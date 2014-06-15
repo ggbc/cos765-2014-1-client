@@ -10,14 +10,15 @@ import java.net.InetAddress;
 public class Client {
 
 	private static int PORT = 15000;
+	private static int PACKET_SIZE = 160; // 160 bytes por pacote	
 
 	public static void main(String[] args) throws Exception {
 		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(
 				System.in));
 		DatagramSocket clientSocket = new DatagramSocket();
 		InetAddress IPAddress = InetAddress.getByName("localhost");
-		byte[] sendData = new byte[160];
-		byte[] receiveData = new byte[160];
+		byte[] sendData = new byte[PACKET_SIZE];
+		byte[] receiveData = new byte[PACKET_SIZE];
 
 		String sentence = inFromUser.readLine();
 		sendData = sentence.getBytes();
