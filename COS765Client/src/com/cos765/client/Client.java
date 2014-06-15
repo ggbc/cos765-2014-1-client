@@ -10,7 +10,7 @@ import java.net.InetAddress;
 public class Client {
 
 	private static int PORT = 15000;
-	private static int PACKET_SIZE = 160; // 160 bytes por pacote	
+	private static int PACKET_SIZE = 160; // 160 bytes por pacote
 
 	public static void main(String[] args) throws Exception {
 		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(
@@ -20,17 +20,20 @@ public class Client {
 		byte[] sendData = new byte[PACKET_SIZE];
 		byte[] receiveData = new byte[PACKET_SIZE];
 
-		String sentence = inFromUser.readLine();
-		sendData = sentence.getBytes();
+		String dataSource = inFromUser.readLine(); // cliente informa o nome do
+													// arquivo desejado
+		sendData = dataSource.getBytes();
 		DatagramPacket sendPacket = new DatagramPacket(sendData,
 				sendData.length, IPAddress, PORT);
 		clientSocket.send(sendPacket);
-		DatagramPacket receivePacket = new DatagramPacket(receiveData,
-				receiveData.length);
-		clientSocket.receive(receivePacket);
-		String modifiedSentence = new String(receivePacket.getData());
-		System.out.println("FROM SERVER: " + modifiedSentence);
-		clientSocket.close();
+		while (true) {
+			DatagramPacket receivePacket = new DatagramPacket(receiveData,
+					receiveData.length);
+			clientSocket.receive(receivePacket);
+			String modifiedSentence = new String(receivePacket.getData());
+			System.out.println("FROM SERVER: " + modifiedSentence);
+		}
+		// clientSocket.close();
 	}
 
 }
