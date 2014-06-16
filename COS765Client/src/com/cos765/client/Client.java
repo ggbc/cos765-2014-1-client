@@ -7,6 +7,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Date;
 
+import com.cos765.common.Segment;
+
 public class Client {
 
 	private static int PORT = 15000;
@@ -19,6 +21,8 @@ public class Client {
 		InetAddress IPAddress = InetAddress.getByName("localhost");
 		byte[] sendData = new byte[PACKET_SIZE];
 		byte[] receiveData = new byte[PACKET_SIZE];
+		long t = 0; // tempo de recebimento de um pacote
+		byte order = 0;
 
 		String fileName = inFromUser.readLine(); // cliente informa o nome do
 													// arquivo desejado
@@ -30,7 +34,10 @@ public class Client {
 			DatagramPacket receivePacket = new DatagramPacket(receiveData,
 					receiveData.length);
 			clientSocket.receive(receivePacket);
-			System.out.println((new Date()).getTime());
+			t = (new Date()).getTime(); // "Quando um segmento é recebido, o tempo atual t é lido."
+			Segment s = new Segment(++order, receiveData, t);
+			
+			System.out.println(t);
 			String modifiedSentence = new String(receivePacket.getData());
 			System.out.println("FROM SERVER: " + modifiedSentence);
 		}
