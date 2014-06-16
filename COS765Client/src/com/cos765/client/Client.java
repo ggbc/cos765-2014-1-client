@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.Socket;
 import java.net.InetAddress;
+import java.util.Date;
 
 public class Client {
 
@@ -20,9 +20,9 @@ public class Client {
 		byte[] sendData = new byte[PACKET_SIZE];
 		byte[] receiveData = new byte[PACKET_SIZE];
 
-		String dataSource = inFromUser.readLine(); // cliente informa o nome do
+		String fileName = inFromUser.readLine(); // cliente informa o nome do
 													// arquivo desejado
-		sendData = dataSource.getBytes();
+		sendData = fileName.getBytes();
 		DatagramPacket sendPacket = new DatagramPacket(sendData,
 				sendData.length, IPAddress, PORT);
 		clientSocket.send(sendPacket);
@@ -30,6 +30,7 @@ public class Client {
 			DatagramPacket receivePacket = new DatagramPacket(receiveData,
 					receiveData.length);
 			clientSocket.receive(receivePacket);
+			System.out.println((new Date()).getTime());
 			String modifiedSentence = new String(receivePacket.getData());
 			System.out.println("FROM SERVER: " + modifiedSentence);
 		}
