@@ -6,13 +6,14 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Date;
-
 import com.cos765.common.Segment;
 
 public class Client {
 
 	private static int PORT = 15000;
 	private static int PACKET_SIZE = 160; // 160 bytes por pacote
+	private static long RTT = 0; // ms
+	private static long X = 0; // variavel aleatória
 
 	public static void main(String[] args) throws Exception {
 		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(
@@ -32,12 +33,12 @@ public class Client {
 		clientSocket.send(sendPacket);
 		while (true) {
 			DatagramPacket receivePacket = new DatagramPacket(receiveData,
-					receiveData.length);
+					receiveData.length);			
 			clientSocket.receive(receivePacket);
+
 			t = (new Date()).getTime(); // "Quando um segmento é recebido, o tempo atual t é lido."
 			Segment s = new Segment(++order, receiveData, t);
 			
-			System.out.println(t);
 			String modifiedSentence = new String(receivePacket.getData());
 			System.out.println("FROM SERVER: " + modifiedSentence);
 		}
