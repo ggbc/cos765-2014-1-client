@@ -6,7 +6,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Date;
-import com.cos765.common.Segment;
+import java.util.LinkedList;
+
+import com.cos765.common.*;
 
 public class Client {
 
@@ -37,7 +39,9 @@ public class Client {
 			clientSocket.receive(receivePacket);
 
 			t = (new Date()).getTime(); // "Quando um segmento é recebido, o tempo atual t é lido."
-			Segment s = new Segment(++order, receiveData, t);
+			Segment segment = new Segment(++order, receiveData, t);
+			
+			segment = LossDelayEmulator.doEmulate(segment); // Emulação de perdas e atrasos			
 			
 			String modifiedSentence = new String(receivePacket.getData());
 			System.out.println("FROM SERVER: " + modifiedSentence);
