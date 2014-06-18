@@ -14,12 +14,12 @@ public class InputBuffer {
 	public boolean add(Segment segment) {
 		// O que fazer quando o buffer ficar cheio?
 		buffer.add(segment);
-		java.util.Collections.sort(buffer);		
+		java.util.Collections.sort(buffer);
 		return true;
 	}
-	
+
 	public Segment remove(int index) {
-		return buffer.remove(index);		
+		return buffer.remove(index);
 	}
 
 }

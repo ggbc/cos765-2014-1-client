@@ -26,6 +26,7 @@ public class Client {
 		byte[] receiveData = new byte[PACKET_SIZE];
 		long t = 0; // tempo de recebimento de um pacote
 		byte order = 0;
+		InputBuffer inBuffer = new InputBuffer();		
 
 		String fileName = inFromUser.readLine(); // cliente informa o nome do
 													// arquivo desejado
@@ -41,7 +42,8 @@ public class Client {
 			t = (new Date()).getTime(); // "Quando um segmento é recebido, o tempo atual t é lido."
 			Segment segment = new Segment(++order, receiveData, t);
 			
-			segment = LossDelayEmulator.doEmulate(segment); // Emulação de perdas e atrasos			
+			segment = LossDelayEmulator.doEmulate(segment); // Emulação de perdas e atrasos
+			inBuffer.add(segment);
 			
 			String modifiedSentence = new String(receivePacket.getData());
 			System.out.println("FROM SERVER: " + modifiedSentence);
