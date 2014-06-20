@@ -1,35 +1,30 @@
 package com.cos765.client;
 
 public class BufferReader {
-	// é uma thread separada que monitora o inputbuffer e verifica sempre se
-	// pode
-	// ler dele.
-	// quando pode ler, usa sua unica thread para disparar o timer e ao termino
-	// do
-	// timer ler o primeiro pacote do buffer e passa-lo adiante ao cliente.
 
 	private static InputBuffer buffer = null;
-
+	private static Thread t;
+	
 	public BufferReader(InputBuffer buffer) {
-		this.buffer = buffer;
+		t = new Thread(new ReaderThread());		
+		BufferReader.buffer = buffer;
 	}
 
 	public static void consumeBuffer() {
-		// quando o buffer está cheio ele chama este método
-		while (buffer.getSize() > 0) {
-			buffer.consume();
-		}
+		if (!t.isAlive())
+			t.run();
 	}
 
 	private static class ReaderThread implements Runnable {
 		public void run() {
-			consumeBuffer();
-			System.out.println(System.currentTimeMillis());
+			while (BufferReader.buffer.getSize() > 0) {
+				try {
+					Thread.sleep(20);
+					BufferReader.buffer.consume();					
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
 		}
-	}
-
-	public static void startThread() {
-		Thread t = new Thread(new ReaderThread());
-		t.start();
 	}
 }
