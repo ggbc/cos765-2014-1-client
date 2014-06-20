@@ -35,12 +35,12 @@ public class InputBuffer {
 	public static void add(Segment segment) {
 		buffer.add(segment);
 
-		// Só pode consumir o buffer quando ele fica cheio	
+		// "vocˆe deve esperar o buffer encher para come¸car a ler os pacotes."	
 		if (buffer.size() == MAX_SIZE)
 			consumer.consumeBuffer();
 	}
 
-	public static Segment consume() { // remover primeiro Segmento da fila
+	public static Segment consume() { 
 		return buffer.removeFirst();
 	}
 
