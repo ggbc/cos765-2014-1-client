@@ -11,11 +11,11 @@ public class InputBuffer {
 
 	private static InputBuffer instance = null; //singleton para o buffer
 	private static LinkedList<Segment> buffer = new LinkedList<Segment>();
-	private static int size = 10; // tamanho default, apenas um chute.
+	private static int MAX_SIZE = 10; // tamanho default, apenas um chute.
 	private static BufferReader consumer;
 
 	private InputBuffer() {
-		// size = // ler p a partir de arquivo de configuração
+
 	}
 
 	public static InputBuffer getInstance() {
@@ -25,23 +25,18 @@ public class InputBuffer {
 	}
 
 	public static int getSize() {
-		return size;
-	}
-	
-	public static void setSize(int size) {
-		size = size;
+		return buffer.size();
 	}
 
 	public static void registerConsumer(BufferReader consumer) {
-		consumer = consumer;
+		InputBuffer.consumer = consumer;
 	}
 
 	public static void add(Segment segment) {
 		buffer.add(segment);
-		java.util.Collections.sort(buffer);
 
 		// Só pode consumir o buffer quando ele fica cheio	
-		if (buffer.size() == size)
+		if (buffer.size() == MAX_SIZE)
 			consumer.consumeBuffer();
 	}
 
