@@ -9,17 +9,44 @@ import com.cos765.common.Segment;
 //e só então enviar os mesmos para a aplicação 
 public class InputBuffer {
 
-	private LinkedList<Segment> buffer = new LinkedList<Segment>();
+	private static InputBuffer instance = null; //singleton para o buffer
+	private static LinkedList<Segment> buffer = new LinkedList<Segment>();
+	private static int size = 10; // tamanho default, apenas um chute.
+	private static BufferReader consumer;
 
-	public boolean add(Segment segment) {
-		// O que fazer quando o buffer ficar cheio?
-		buffer.add(segment);
-		java.util.Collections.sort(buffer);
-		return true;
+	private InputBuffer() {
+		// size = // ler p a partir de arquivo de configuração
 	}
 
-	public Segment remove(int index) {
-		return buffer.remove(index);
+	public static InputBuffer getInstance() {
+		if (instance == null)
+			instance = new InputBuffer();
+		return instance;
+	}
+
+	public static int getSize() {
+		return size;
+	}
+	
+	public static void setSize(int size) {
+		size = size;
+	}
+
+	public static void registerConsumer(BufferReader consumer) {
+		consumer = consumer;
+	}
+
+	public static void add(Segment segment) {
+		buffer.add(segment);
+		java.util.Collections.sort(buffer);
+
+		// Só pode consumir o buffer quando ele fica cheio	
+		if (buffer.size() == size)
+			consumer.consumeBuffer();
+	}
+
+	public static Segment consume() { // remover primeiro Segmento da fila
+		return buffer.removeFirst();
 	}
 
 }
