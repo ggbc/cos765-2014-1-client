@@ -18,7 +18,6 @@ public class BufferReader {
 		// quando o buffer está cheio ele chama este método
 		while (buffer.getSize() > 0) {
 			buffer.consume();
-			System.out.println("CONSUMI UM SEGMENTO DO BUFFER!");
 		}
 	}
 
