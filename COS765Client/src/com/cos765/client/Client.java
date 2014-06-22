@@ -92,24 +92,13 @@ class Producer implements Runnable {
 	public void run() {
 		while(true)
 		{
-			
-			
 			try {
 				produce((int)list.take());
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}
-		
-		
-//		for (int i = 0; i < 7; i++) {
-//			try {
-//				produce(i);
-//				Thread.sleep(20);
-//			} catch (InterruptedException ex) {
-//			}
-//		}
+		}		
 	}
 
 	private void produce(int i) throws InterruptedException {
