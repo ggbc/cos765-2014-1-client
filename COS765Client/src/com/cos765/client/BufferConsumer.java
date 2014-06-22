@@ -1,6 +1,7 @@
 package com.cos765.client;
 
 import java.util.Vector;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import com.cos765.common.Common;
 
