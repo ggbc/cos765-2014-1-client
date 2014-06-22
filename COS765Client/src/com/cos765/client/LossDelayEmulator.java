@@ -1,17 +1,29 @@
 package com.cos765.client;
 
+import java.util.concurrent.LinkedBlockingQueue;
+
 import com.cos765.common.Segment;
 
 
 public class LossDelayEmulator {
 
-	public static Segment doEmulate (Segment segment) {
-		Segment pSegment = delay(segment);
-		return loseByChance(pSegment);
+	private LinkedBlockingQueue<Segment> delayList = new LinkedBlockingQueue<Segment>();
+	
+	public LossDelayEmulator(LinkedBlockingQueue<Segment> delayList) {
+		this.delayList = delayList;
 	}
+	
+	public void add(Segment s) {
+		Segment segment = new Segment(s.getOrder(), s.getPayload(), s.getTime());
 		
-	private static Segment delay (Segment segment) {
-		// Capturar o tempo atual
+		
+	}
+	
+	public Segment remove(){
+		return null;
+	}
+			
+	private Segment delay (Segment segment) {
 		// Atrasar de RTT/2 + X
 		// Retornar o Segmento
 		segment.setTime(segment.getTime() + 20); // TESTE: + 20 tem que virar +  (RTT/2  + X)
