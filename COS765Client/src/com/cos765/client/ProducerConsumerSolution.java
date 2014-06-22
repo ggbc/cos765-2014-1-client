@@ -1,6 +1,5 @@
 package com.cos765.client;
 import java.util.Vector;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class ProducerConsumerSolution {
 

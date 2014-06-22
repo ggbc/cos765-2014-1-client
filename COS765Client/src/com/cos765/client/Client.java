@@ -13,7 +13,7 @@ import com.cos765.common.*;
 
 public class Client {
 
-	private static int PORT = 15000;
+
 
 	public static void main(String[] args) throws Exception {
 		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
@@ -32,7 +32,7 @@ public class Client {
 			// Cliente informa o nome do arquivo desejado
 			String fileName = inFromUser.readLine(); 
 			sendData = fileName.getBytes();
-			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, PORT);
+			DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, Common.SERVER_PORT);
 			clientSocket.send(sendPacket);
 			
 			// Recebendo stream de bytes do arquivo solicitado
