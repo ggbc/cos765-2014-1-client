@@ -25,8 +25,8 @@ public class Client {
 		long receiveTime = 0;
 		byte sendOrder = 0;
 
-		InputBuffer inBuffer = new InputBuffer();
-		BufferConsumer consumer = new BufferConsumer(inBuffer);
+//		InputBuffer inBuffer = new InputBuffer();
+//		BufferConsumer consumer = new BufferConsumer(inBuffer);
 					
 		try {
 			// Cliente informa o nome do arquivo desejado
@@ -45,7 +45,7 @@ public class Client {
 				payload = Arrays.copyOfRange(receiveData, 1, receiveData.length - 1);
 
 				Segment segment = new Segment(sendOrder, payload, receiveTime);
-				inBuffer.add(segment);
+//				inBuffer.add(segment);
 				//TODO: levar para camada de atraso
 				//TODO: levar para camada de buffer
 				//TODO: levar para camada de aplicação (esta de novo?) 
