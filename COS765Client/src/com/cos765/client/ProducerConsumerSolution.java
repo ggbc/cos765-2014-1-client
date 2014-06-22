@@ -1,17 +1,17 @@
 package com.cos765.client;
 import java.util.Vector;
 
+import com.cos765.common.Common;
+
 public class ProducerConsumerSolution {
 
-	public static Boolean bufferFull = false;
-
 	public static void main(String args[]) {
-
+		
 		Vector buffer = new Vector();
-		int MAX_SIZE = 4;
-		Thread producer = new Thread(new Producer(buffer, MAX_SIZE),
+		final int MAX_BUFFER_SIZE = 4;
+		Thread producer = new Thread(new Producer(buffer, MAX_BUFFER_SIZE),
 				"Produtor");
-		Thread consumer = new Thread(new Consumer(buffer, MAX_SIZE),
+		Thread consumer = new Thread(new Consumer(buffer, MAX_BUFFER_SIZE),
 				"Consumidor");
 		producer.start();
 		consumer.start();
@@ -54,7 +54,7 @@ class Producer implements Runnable {
 		synchronized (buffer) {
 			buffer.add(i);
 			if (buffer.size() == SIZE)
-				ProducerConsumerSolution.bufferFull = true;
+				Common.bufferFull = true;
 			System.out.println("P: " + buffer.toString());
 			buffer.notifyAll(); // só permite consumir quando esteve cheio em
 								// algum momento
@@ -85,9 +85,9 @@ class Consumer implements Runnable {
 
 	private int consume() throws InterruptedException {
 		// Se não ficou cheio ainda, espere
-		while (ProducerConsumerSolution.bufferFull == false) {
+		while (Common.bufferFull == false) {
 			synchronized (buffer) {
-				System.out.println("Buffer esvaziou. "
+				System.out.println("Buffer ainda não (re)encheu. "
 						+ Thread.currentThread().getName()
 						+ " esperando, size: " + buffer.size());
 				buffer.wait();
@@ -98,7 +98,7 @@ class Consumer implements Runnable {
 			Integer i = (Integer) buffer.remove(0);
 			System.out.println("C: " + buffer.toString());
 			if (buffer.size() == 0)
-				ProducerConsumerSolution.bufferFull = false;
+				Common.bufferFull = false;
 			buffer.notifyAll();
 			return i;
 		}
