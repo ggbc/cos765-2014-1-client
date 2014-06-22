@@ -7,14 +7,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.LinkedList;
 
-import com.cos765.common.*;
+import com.cos765.common.Common;
+import com.cos765.common.Segment;
 
 public class Client {
-
-
-
+			
 	public static void main(String[] args) throws Exception {
 		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
 		DatagramSocket clientSocket = new DatagramSocket();
@@ -61,3 +59,4 @@ public class Client {
 		}
 	}
 }
+

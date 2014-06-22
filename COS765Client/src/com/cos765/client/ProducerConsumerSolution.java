@@ -11,7 +11,7 @@ public class ProducerConsumerSolution {
 		final int MAX_BUFFER_SIZE = 4;
 		Thread producer = new Thread(new Producer(buffer, MAX_BUFFER_SIZE),
 				"Produtor");
-		Thread consumer = new Thread(new Consumer(buffer, MAX_BUFFER_SIZE),
+		Thread consumer = new Thread(new BufferConsumer(buffer, MAX_BUFFER_SIZE),
 				"Consumidor");
 		producer.start();
 		consumer.start();
@@ -62,45 +62,45 @@ class Producer implements Runnable {
 	}
 }
 
-class Consumer implements Runnable {
-
-	private Vector buffer;
-	private final int SIZE;
-
-	public Consumer(Vector buffer, int size) {
-		this.buffer = buffer;
-		this.SIZE = size;
-	}
-
-	@Override
-	public void run() {
-		while (true) {
-			try {
-				Thread.sleep(20);
-				consume();
-			} catch (InterruptedException ex) {
-			}
-		}
-	}
-
-	private int consume() throws InterruptedException {
-		// Se não ficou cheio ainda, espere
-		while (Common.bufferFull == false) {
-			synchronized (buffer) {
-				System.out.println("Buffer ainda não (re)encheu. "
-						+ Thread.currentThread().getName()
-						+ " esperando, size: " + buffer.size());
-				buffer.wait();
-			}
-		}
-
-		synchronized (buffer) {
-			Integer i = (Integer) buffer.remove(0);
-			System.out.println("C: " + buffer.toString());
-			if (buffer.size() == 0)
-				Common.bufferFull = false;
-			buffer.notifyAll();
-			return i;
-		}
-	}
-}
+//class Consumer implements Runnable {
+//
+//	private Vector buffer;
+//	private final int SIZE;
+//
+//	public Consumer(Vector buffer, int size) {
+//		this.buffer = buffer;
+//		this.SIZE = size;
+//	}
+//
+//	@Override
+//	public void run() {
+//		while (true) {
+//			try {
+//				Thread.sleep(20);
+//				consume();
+//			} catch (InterruptedException ex) {
+//			}
+//		}
+//	}
+//
+//	private int consume() throws InterruptedException {
+//		// Se não ficou cheio ainda, espere
+//		while (Common.bufferFull == false) {
+//			synchronized (buffer) {
+//				System.out.println("Buffer ainda não (re)encheu. "
+//						+ Thread.currentThread().getName()
+//						+ " esperando, size: " + buffer.size());
+//				buffer.wait();
+//			}
+//		}
+//
+//		synchronized (buffer) {
+//			Integer i = (Integer) buffer.remove(0);
+//			System.out.println("C: " + buffer.toString());
+//			if (buffer.size() == 0)
+//				Common.bufferFull = false;
+//			buffer.notifyAll();
+//			return i;
+//		}
+//	}
+//}
