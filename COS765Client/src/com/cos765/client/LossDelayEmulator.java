@@ -1,10 +1,13 @@
 package com.cos765.client;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import com.cos765.common.Common;
 import com.cos765.common.Segment;
 
 public class LossDelayEmulator {
@@ -18,7 +21,6 @@ public class LossDelayEmulator {
 			return;
 		s = delay(s); // se não foi perdido, calcule atraso aleatório
 		addSorted(s); // coloque na fila na posição correta
-//		segmentsList.add(s);
 		System.out.println("s: " + s.getOrder() + " colocado na lista de atrasos." + LossDelayEmulator.segmentsList.toString());		
 	}
 
@@ -33,8 +35,7 @@ public class LossDelayEmulator {
 	}	
 	
 	private static Segment delay(Segment segment) {
-		// Atrasar de RTT/2 + X
-		segment.setTime(segment.getTime() + (long)(new Random()).nextInt(100)); // TESTE: + 20 tem que virar + (RTT/2 + X)
+		segment.setTime(segment.getTime() + (long)(new Random()).nextInt(100)); // TODO: tn = t + RTT/2 + X
 		return segment;
 	}
 
@@ -44,3 +45,4 @@ public class LossDelayEmulator {
 	}
 
 }
+

@@ -4,6 +4,7 @@ import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.cos765.common.Common;
+import com.cos765.common.Segment;
 
 public class BufferConsumer implements Runnable {
 
@@ -30,7 +31,7 @@ public class BufferConsumer implements Runnable {
 		}
 	}
 
-	private int consume() throws InterruptedException {
+	private Segment consume() throws InterruptedException {
 		// Se não ficou cheio ainda, espere
 		while (Common.bufferFull == false) {
 			synchronized (buffer) {
@@ -42,12 +43,12 @@ public class BufferConsumer implements Runnable {
 		}
 
 		synchronized (buffer) {
-			Integer i = (Integer) buffer.remove(0); // TODO: Trocar Integer por Common.Segment
+			Segment s = (Segment) buffer.remove(0);
 			System.out.println("C: " + buffer.toString());
 			if (buffer.size() == 0)
 				Common.bufferFull = false;
 			buffer.notifyAll();
-			return i;
+			return s;
 		}
 	}
 }
