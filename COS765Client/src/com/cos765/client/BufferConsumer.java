@@ -19,6 +19,10 @@ public class BufferConsumer implements Runnable {
 	public void run() {
 		while (true) {
 			try {
+				// TODO: Se no momento da leitura do pacote i ele n˜ao estiver no buffer, deve-se tocar o pacote com n´umero
+//				de sequencia i + 1 (ou o de menor n´umero de sequencia armazenado no buffer) e o pacote i nunca ser´a
+//				tocado. 				
+				
 				Thread.sleep(20);
 				consume();
 			} catch (InterruptedException ex) {

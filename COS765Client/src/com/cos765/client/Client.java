@@ -8,6 +8,9 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -15,17 +18,13 @@ import com.cos765.common.Common;
 import com.cos765.common.Segment;
 
 public class Client {
-
+	
 	public static void main(String args[]) throws SocketException, UnknownHostException {
-		
+				
 		Vector buffer = new Vector();
-		LinkedBlockingQueue<Integer> delayList = new LinkedBlockingQueue<Integer>();
-		
-		final int MAX_BUFFER_SIZE = 4;
-		Thread producer = new Thread(new Producer(buffer, MAX_BUFFER_SIZE, delayList),
-				"Produtor");
-		Thread consumer = new Thread(new BufferConsumer(buffer, MAX_BUFFER_SIZE),
-				"Consumidor");
+				
+		Thread producer = new Thread(new Producer(buffer, Common.MAX_BUFFER_SIZE), "Produtor");
+		Thread consumer = new Thread(new BufferConsumer(buffer, Common.MAX_BUFFER_SIZE), "Consumidor");
 		producer.start();
 		consumer.start();
 		
@@ -39,7 +38,6 @@ public class Client {
 		long receiveTime = 0;
 		byte sendOrder = 0;	
 	
-			
 		try {
 			// Cliente informa o nome do arquivo desejado
 			String fileName = inFromUser.readLine(); 
@@ -58,10 +56,12 @@ public class Client {
 
 				Segment segment = new Segment(sendOrder, payload, receiveTime);
 				
-				delayList.put((int) sendOrder);	
-				System.out.println("Chegou via UDP: " + delayList.toString());
+				//TODO: Adicionar o segmento à lista de atrasos. 
+				//A thread produtora vai ler a lista de atrasos e produzir um segmento para a camada acima somente no tempo certo 
+				LossDelayEmulator.doEmulate(segment);
+//				LossDelayEmulator.segList.add(segment);
 
-				// TODO: registrar log do que foi recebido
+
 //				String modifiedSentence = new String(receivePacket.getData());
 //				System.out.println("FROM SERVER: " + modifiedSentence);
 			}
@@ -73,32 +73,40 @@ public class Client {
 	}
 }
 
-//Vai implementar a camada de simulação de atrasos e perda de dados
-//1 - Vai receber cada pacote da camada UDP
-//2 - 
 class Producer implements Runnable { 
 
 	private Vector buffer;
 	private final int SIZE;
-	private LinkedBlockingQueue<Integer> list;
-
-	public Producer(Vector buffer, int size, LinkedBlockingQueue<Integer> list) {
+//	private LinkedBlockingQueue<Segment> list;
+	
+	public Producer(Vector buffer, int size) {
 		this.buffer = buffer;
 		this.SIZE = size;
-		this.list = list;
+//		this.list = list;
 	}
 
 	@Override
 	public void run() {
 		while(true)
 		{
+			// TODO: Caso o buffer esteja cheio, deve-se remover o pacote mais velho que
+//			encontra-se no buffer para dar espa¸co ao novo pacote.
+			
+			//TODO: Por outro lado, um pacote que chegar da rede
+//			mas j´a estiver expirado nunca deve ser armazenado no buffer. 
+		
 			try {
-				produce((int)list.take());
+				Segment segment = LossDelayEmulator.segmentsList.peek();				
+				if (segment != null) 
+					if (segment.getTime() == (new Date().getTime())) {
+						System.out.println("s: " + segment.getOrder() + " now: " + segment.getTime() + " seg.t:" + (new Date().getTime()));					
+						produce((int)(LossDelayEmulator.segmentsList.take()).getOrder()); // TODO: corrigir de int -> Segment
+						System.out.println("s: " + segment.getOrder() + " retirado da lista de atrasos: " + LossDelayEmulator.segmentsList.toString());
+					}
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}		
+		}
 	}
 
 	private void produce(int i) throws InterruptedException {
