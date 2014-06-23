@@ -10,7 +10,7 @@ public class BufferConsumer implements Runnable {
 	private Vector buffer;
 	private final int SIZE;
 
-	public BufferConsumer(Vector buffer, int size) {
+	public BufferConsumer(Vector buffer, int size) {	
 		this.buffer = buffer;
 		this.SIZE = size;
 	}

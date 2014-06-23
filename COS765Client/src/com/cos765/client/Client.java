@@ -59,8 +59,6 @@ public class Client {
 				//TODO: Adicionar o segmento à lista de atrasos. 
 				//A thread produtora vai ler a lista de atrasos e produzir um segmento para a camada acima somente no tempo certo 
 				LossDelayEmulator.doEmulate(segment);
-//				LossDelayEmulator.segList.add(segment);
-
 
 //				String modifiedSentence = new String(receivePacket.getData());
 //				System.out.println("FROM SERVER: " + modifiedSentence);
@@ -79,23 +77,24 @@ class Producer implements Runnable {
 	private final int SIZE;
 //	private LinkedBlockingQueue<Segment> list;
 	
-	public Producer(Vector buffer, int size) {
+	public Producer(Vector buffer, int size) { 	
 		this.buffer = buffer;
 		this.SIZE = size;
-//		this.list = list;
 	}
 
 	@Override
 	public void run() {
 		while(true)
-		{
-			// TODO: Caso o buffer esteja cheio, deve-se remover o pacote mais velho que
-//			encontra-se no buffer para dar espa¸co ao novo pacote.
-			
-			//TODO: Por outro lado, um pacote que chegar da rede
-//			mas j´a estiver expirado nunca deve ser armazenado no buffer. 
-		
+		{		
 			try {
+				Thread.sleep(1);
+			
+				// TODO: Caso o buffer esteja cheio, deve-se remover o pacote mais velho que
+//				encontra-se no buffer para dar espa¸co ao novo pacote.
+				
+				//TODO: Por outro lado, um pacote que chegar da rede
+//				mas j´a estiver expirado nunca deve ser armazenado no buffer.				
+				
 				Segment segment = LossDelayEmulator.segmentsList.peek();				
 				if (segment != null) 
 					if (segment.getTime() == (new Date().getTime())) {
@@ -103,6 +102,7 @@ class Producer implements Runnable {
 						produce((int)(LossDelayEmulator.segmentsList.take()).getOrder()); // TODO: corrigir de int -> Segment
 						System.out.println("s: " + segment.getOrder() + " retirado da lista de atrasos: " + LossDelayEmulator.segmentsList.toString());
 					}
+					else System.out.println("now: " + (new Date().getTime()));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
