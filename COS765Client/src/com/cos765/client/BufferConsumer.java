@@ -41,13 +41,13 @@ public class BufferConsumer implements Runnable {
 		}
 
 		synchronized (buffer) {
-			while (buffer.getFirst().getOrder() != nextSegmentToPlay) {
-				segmentsNotPlayed++;
-				nextSegmentToPlay++;				
+			while (buffer.getFirst().getSequenceNumber() != nextSegmentToPlay) {
 				// "Se no momento da leitura do pacote i ele n˜ao estiver no buffer, deve-se tocar o pacote com n´umero
 				//de sequencia i + 1 (ou o de menor n´umero de sequencia armazenado no buffer) e o pacote i nunca ser´a
 				//tocado."					
-				// "O pacote i deve ser contabilizado como pacote perdido."				
+				// "O pacote i deve ser contabilizado como pacote perdido."
+				segmentsNotPlayed++;
+				nextSegmentToPlay++;				
 			}			
 			
 			Segment s = (Segment) buffer.removeFirst();	
@@ -55,7 +55,7 @@ public class BufferConsumer implements Runnable {
 			System.out.println("C: " + buffer.toString());
 			if (buffer.size() == 0)
 				Common.bufferFull = false;
-//			buffer.notifyAll(); // talvez seja desnecessaria essa linha
+//			buffer.notifyAll(); 
 			return s;
 		}
 	}

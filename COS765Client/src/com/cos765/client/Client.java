@@ -22,12 +22,12 @@ public class Client {
 
 	public static void main(String args[]) throws SocketException, UnknownHostException {		
 		
+		LossDelaySimulator.configure(); // ler parâmetros de configuração do simulador		
+		
 		LinkedList<Segment> buffer = new LinkedList<Segment>();
-		Thread producer = new Thread(new BufferProducer(buffer, Common.MAX_BUFFER_SIZE), "Produtor");
-		Thread consumer = new Thread(new BufferConsumer(buffer, Common.MAX_BUFFER_SIZE), "Consumidor");		
-		
-		LossDelaySimulator.configure(); // ler parâmetros de configuração do simulador
-		
+		Thread producer = new Thread(new BufferProducer(buffer, Common.maxBufferSize), "Produtor");
+		Thread consumer = new Thread(new BufferConsumer(buffer, Common.maxBufferSize), "Consumidor");		
+				
 		producer.start();
 		consumer.start();
 
@@ -38,7 +38,7 @@ public class Client {
 		byte[] receiveData = new byte[Segment.PAYLOAD_SIZE + Segment.HEADER_SIZE]; // bytes do arquivo recebido
 		byte[] payload = new byte[Segment.PAYLOAD_SIZE];
 		long receiveTime = 0;
-		byte sendOrder = 0;
+		byte sequenceNumber = 0;
 
 		try {
 			// Cliente informa o nome do arquivo desejado
@@ -55,19 +55,12 @@ public class Client {
 				clientSocket.receive(receivePacket);
 
 				receiveTime = (new Date()).getTime(); // "Quando um segmento é recebido, o tempo atual t é lido."
-				sendOrder = receiveData[0];
+				sequenceNumber = receiveData[0];
 				payload = Arrays.copyOfRange(receiveData, 1,
 						receiveData.length - 1);
 
-				Segment segment = new Segment(sendOrder, payload, receiveTime);
-
-				// A thread produtora vai ler a lista de atrasos e produzir um
-				// segmento para a camada acima somente no tempo certo
+				Segment segment = new Segment(sequenceNumber, payload, receiveTime);
 				LossDelaySimulator.doSimulate(segment);
-
-				// String modifiedSentence = new
-//				 String(receivePacket.getData());
-				// System.out.println("FROM SERVER: " + modifiedSentence);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

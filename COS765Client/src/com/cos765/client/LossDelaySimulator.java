@@ -21,9 +21,9 @@ import com.cos765.common.Segment;
 public class LossDelaySimulator {
 
 	public static LinkedBlockingQueue<Segment> segmentsList = new LinkedBlockingQueue<Segment>();
-	private static double E_x = 50.0; // tempo médio entre os eventos. média da v.a. com distribuição exponencial X
+	private static double E_x = 500.0; // tempo médio E[x] entre os eventos. média da v.a. com distribuição exponencial X
 	private static double p = 0.3; // probabilidade de perda de pacotes
-	private static long RTT = 100; 
+	private static long RTT = 100; 	
 	
 	public static void configure() {
 		Properties prop = new Properties();			
@@ -36,7 +36,8 @@ public class LossDelaySimulator {
 
 			RTT = Long.parseLong(prop.getProperty("RTT"));
 			p = Double.parseDouble(prop.getProperty("p"));
-			E_x = Double.parseDouble(prop.getProperty("E_x"));	
+			E_x = Double.parseDouble(prop.getProperty("E_x"));
+			Common.maxBufferSize = Integer.parseInt(prop.getProperty("max_buffer_size"));
 
 		} catch(FileNotFoundException ex) {
 
@@ -46,6 +47,7 @@ public class LossDelaySimulator {
 				prop.setProperty("RTT", ((Long)RTT).toString());
 				prop.setProperty("p", ((Double)p).toString());
 				prop.setProperty("E_x", ((Double)E_x).toString());
+				prop.setProperty("max_buffer_size", ((Integer)Common.maxBufferSize).toString());
  
 				prop.store(output, null);
 			} catch (FileNotFoundException e) {
@@ -108,7 +110,7 @@ public class LossDelaySimulator {
 	private static Segment loseByChance(Segment segment) {
 		Probability lossChance = new Probability(p);		
 		if (lossChance.nextEvent(new Random()) == true) {
-			System.out.println("perda do segmento: " + segment.toString()); 
+//			System.out.println("perda do segmento: " + segment.toString()); 
 			return null;
 		} else
 			return segment;
@@ -139,7 +141,7 @@ class BufferProducer implements Runnable {
 
 						// "Por outro lado, um pacote que chegar da rede
 						// mas j´a estiver expirado nunca deve ser armazenado no buffer."
-						if (segment.getOrder() < lastBufferSegment) {
+						if (segment.getSequenceNumber() < lastBufferSegment) {
 							LossDelaySimulator.segmentsList.poll();
 						} else {
 							synchronized (buffer) {
@@ -172,8 +174,8 @@ class BufferProducer implements Runnable {
 		// producing element and notify consumers
 		synchronized (buffer) {
 			buffer.add(s);
-			if (s.getOrder() > lastBufferSegment) { 
-				lastBufferSegment = s.getOrder();
+			if (s.getSequenceNumber() > lastBufferSegment) { 
+				lastBufferSegment = s.getSequenceNumber();
 			}
 			if (buffer.size() == SIZE) { 
 				Common.bufferFull = true; 
