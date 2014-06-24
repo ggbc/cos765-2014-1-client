@@ -9,7 +9,10 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Random;
 import java.util.Vector;
+
+import org.uncommons.maths.random.Probability;
 
 import com.cos765.common.Common;
 import com.cos765.common.Segment;
@@ -19,22 +22,19 @@ public class Client {
 	public static void main(String args[]) throws SocketException, UnknownHostException {
 
 		Vector buffer = new Vector();
-
-		Thread producer = new Thread(new Producer(buffer,
-				Common.MAX_BUFFER_SIZE), "Produtor");
-		Thread consumer = new Thread(new BufferConsumer(buffer,
-				Common.MAX_BUFFER_SIZE), "Consumidor");
+		Thread producer = new Thread(new Producer(buffer, Common.MAX_BUFFER_SIZE), "Produtor");
+		Thread consumer = new Thread(new BufferConsumer(buffer, Common.MAX_BUFFER_SIZE), "Consumidor");
+		
+		LossDelayEmulator.configure(); // ler parâmetros do 
+		
 		producer.start();
 		consumer.start();
 
-		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(
-				System.in));
+		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
 		DatagramSocket clientSocket = new DatagramSocket();
 		InetAddress IPAddress = InetAddress.getByName("localhost");
-		byte[] sendData = new byte[Segment.PAYLOAD_SIZE]; // nome do arquivo
-															// solicitado
-		byte[] receiveData = new byte[Segment.PAYLOAD_SIZE
-				+ Segment.HEADER_SIZE]; // bytes do arquivo recebido
+		byte[] sendData = new byte[Segment.PAYLOAD_SIZE]; // nome do arquivosolicitado
+		byte[] receiveData = new byte[Segment.PAYLOAD_SIZE + Segment.HEADER_SIZE]; // bytes do arquivo recebido
 		byte[] payload = new byte[Segment.PAYLOAD_SIZE];
 		long receiveTime = 0;
 		byte sendOrder = 0;
@@ -74,8 +74,8 @@ public class Client {
 			clientSocket.close();
 		}
 	}
-
 }
+
 
 class Producer implements Runnable {
 
