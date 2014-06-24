@@ -99,13 +99,16 @@ class Producer implements Runnable {
 				
 				Segment segment = LossDelaySimulator.segmentsList.peek();
 				if (segment != null)
-					if (segment.getTime() == (new Date().getTime())) {
-						
-						if (buffer.size() == SIZE) System.out.println("O BUFFER ESTA CHEIO E DEVO ELIMINAR O PACOTE MAIS VELHO PRA DEPOIS INSERIR ESTE:" + segment.toString());
-						
-//						System.out.println("s: " + segment.getOrder() + " now: " + segment.getTime() + " seg.t:" + (new Date().getTime()));
-						produce(LossDelaySimulator.segmentsList.take());						
-//						System.out.println("s: " + segment.getOrder() + " retirado da lista de atrasos: " + LossDelaySimulator.segmentsList.toString());
+					if (segment.getTime() <= (new Date().getTime())) {
+						synchronized (buffer) {
+							if (SIZE == buffer.size()) {								
+								System.out.println("BUFFER JÁ ESTÁ CHEIO!! " + segment.toString() + " substituirá: " + buffer.getFirst());
+								buffer.removeFirst();
+							}
+//							System.out.println("s: " + segment.getOrder() + " now: " + segment.getTime() + " seg.t:" + (new Date().getTime()));
+							produce(LossDelaySimulator.segmentsList.take());						
+//							System.out.println("s: " + segment.getOrder() + " retirado da lista de atrasos: " + LossDelaySimulator.segmentsList.toString());
+						}						
 					} 
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -115,12 +118,13 @@ class Producer implements Runnable {
 
 	private void produce(Segment s) throws InterruptedException {
 
-		while (buffer.size() == SIZE) {
-			synchronized (buffer) {
-				System.out.println("Buffer cheio. " + Thread.currentThread().getName() + " esperando, size: " + buffer.size());			
-				buffer.wait();
-			}
-		}
+		// Esta condição não precisa existir porque o buffer já não vai parar de receber dados quando estiver cheio, mas sim vai descartar o mais velho. 
+//		while (buffer.size() == SIZE) {
+//			synchronized (buffer) {
+//				System.out.println("Buffer cheio. " + Thread.currentThread().getName() + " esperando, size: " + buffer.size());			
+//				buffer.wait();
+//			}
+//		}
 
 		// producing element and notify consumers
 		synchronized (buffer) {

@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Random;
@@ -20,9 +19,9 @@ import com.cos765.common.Segment;
 public class LossDelaySimulator {
 
 	public static LinkedBlockingQueue<Segment> segmentsList = new LinkedBlockingQueue<Segment>();
-	private static double E_x = 0.0; // tempo médio entre os eventos. média da v.a. com distribuição exponencial X
-	private static double p = 0.0; // probabilidade de perda de pacotes
-	private static long RTT = 0; 
+	private static double E_x = 50.0; // tempo médio entre os eventos. média da v.a. com distribuição exponencial X
+	private static double p = 0.3; // probabilidade de perda de pacotes
+	private static long RTT = 100; 
 	
 	public static void configure() {
 		Properties prop = new Properties();			
@@ -35,14 +34,29 @@ public class LossDelaySimulator {
 
 			RTT = Long.parseLong(prop.getProperty("RTT"));
 			p = Double.parseDouble(prop.getProperty("p"));
-			E_x = Double.parseDouble(prop.getProperty("E_x"));		
+			E_x = Double.parseDouble(prop.getProperty("E_x"));	
 
+		} catch(FileNotFoundException ex) {
+
+			try {
+				OutputStream output = new FileOutputStream("config.properties");
+
+				prop.setProperty("RTT", ((Long)RTT).toString());
+				prop.setProperty("p", ((Double)p).toString());
+				prop.setProperty("E_x", ((Double)E_x).toString());
+ 
+				prop.store(output, null);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}			
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		} catch (NumberFormatException ex) {
 			ex.printStackTrace();
 		} 
-		finally {
+		finally {		
 			if (input != null) {
 				try {
 					input.close();
@@ -68,13 +82,11 @@ public class LossDelaySimulator {
 	// Adiciona o segmento à fila ordenada na posição correta de acordo com o
 	// tempo
 	private static void addSorted(Segment s) {
-		// Usa uma lista circular temporária para reordenar o conteúdo da fila
-		// bloqueante
+		// Usa uma lista circular temporária para reordenar o conteúdo da fila bloqueante
 		LinkedList<Segment> tempList = new LinkedList<Segment>();
 		segmentsList.drainTo(tempList);
 		tempList.add(s);
-		java.util.Collections.sort(tempList); // após inserção do novo elemento,
-												// reordena
+		java.util.Collections.sort(tempList); // após inserção do novo elemento, reordena
 		segmentsList.addAll(tempList);
 	}
 
@@ -87,7 +99,7 @@ public class LossDelaySimulator {
 
 		tn = segment.getTime() + RTT/2 + Math.round(x);
 				
-		System.out.println(x + " : "+ (segment.getTime() - tn));
+//		System.out.println(x + " : "+ (segment.getTime() - tn));
 		segment.setTime(tn); 
 
 		return segment;

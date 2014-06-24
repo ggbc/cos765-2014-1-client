@@ -33,7 +33,6 @@ public class BufferConsumer implements Runnable {
 	}
 
 	private Segment consume() throws InterruptedException {
-		// Se não ficou cheio ainda, espere
 		while (Common.bufferFull == false) {
 			synchronized (buffer) {
 				System.out.println("Buffer ainda não (re)encheu. "
@@ -44,12 +43,11 @@ public class BufferConsumer implements Runnable {
 		}
 
 		synchronized (buffer) {
-			Segment s = (Segment) buffer.removeFirst();
-//			Segment s = (Segment) buffer.remove(0);			
+			Segment s = (Segment) buffer.removeFirst();	
 			System.out.println("C: " + buffer.toString());
 			if (buffer.size() == 0)
 				Common.bufferFull = false;
-			buffer.notifyAll();
+//			buffer.notifyAll(); // talvez seja desnecessaria essa linha
 			return s;
 		}
 	}
