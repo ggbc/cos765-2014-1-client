@@ -117,11 +117,7 @@ class Producer implements Runnable {
 
 		while (buffer.size() == SIZE) {
 			synchronized (buffer) {
-				System.out.println("Buffer cheio. " + Thread.currentThread().getName() + " esperando, size: " + buffer.size());
-//				// TODO: Caso o buffer esteja cheio, deve-se remover o pacote
-//				// mais velho que
-//				// encontra-se no buffer para dar espa¸co ao novo pacote.				
-//				buffer.remove(SIZE-1);  
+				System.out.println("Buffer cheio. " + Thread.currentThread().getName() + " esperando, size: " + buffer.size());			
 				buffer.wait();
 			}
 		}
