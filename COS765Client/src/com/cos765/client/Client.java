@@ -9,6 +9,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.Vector;
 
@@ -19,13 +20,13 @@ import com.cos765.common.Segment;
 
 public class Client {
 
-	public static void main(String args[]) throws SocketException, UnknownHostException {
-
-		Vector buffer = new Vector();
-		Thread producer = new Thread(new Producer(buffer, Common.MAX_BUFFER_SIZE), "Produtor");
-		Thread consumer = new Thread(new BufferConsumer(buffer, Common.MAX_BUFFER_SIZE), "Consumidor");
+	public static void main(String args[]) throws SocketException, UnknownHostException {		
 		
-		LossDelayEmulator.configure(); // ler parâmetros do 
+		LinkedList<Segment> buffer = new LinkedList<Segment>();
+		Thread producer = new Thread(new Producer(buffer, Common.MAX_BUFFER_SIZE), "Produtor");
+		Thread consumer = new Thread(new BufferConsumer(buffer, Common.MAX_BUFFER_SIZE), "Consumidor");		
+		
+		LossDelaySimulator.configure(); // ler parâmetros de configuração do simulador
 		
 		producer.start();
 		consumer.start();
@@ -62,7 +63,7 @@ public class Client {
 
 				// A thread produtora vai ler a lista de atrasos e produzir um
 				// segmento para a camada acima somente no tempo certo
-				LossDelayEmulator.doEmulate(segment);
+				LossDelaySimulator.doSimulate(segment);
 
 				// String modifiedSentence = new
 				// String(receivePacket.getData());
@@ -79,10 +80,10 @@ public class Client {
 
 class Producer implements Runnable {
 
-	private Vector buffer;
+	private LinkedList<Segment> buffer;
 	private final int SIZE;
 
-	public Producer(Vector buffer, int size) {
+	public Producer(LinkedList<Segment> buffer, int size) {
 		this.buffer = buffer;
 		this.SIZE = size;
 	}
@@ -91,23 +92,21 @@ class Producer implements Runnable {
 	public void run() {
 		while (true) {
 			try {
-				Thread.sleep(1);
+				Thread.sleep(1); // a cada 1 ms verifica se está na hora de enviar algo para o buffer
 
-				// TODO: Caso o buffer esteja cheio, deve-se remover o pacote
-				// mais velho que
-				// encontra-se no buffer para dar espa¸co ao novo pacote.
-
-				// TODO: Por outro lado, um pacote que chegar da rede
-				// mas j´a estiver expirado nunca deve ser armazenado no buffer.
-
-				Segment segment = LossDelayEmulator.segmentsList.peek();
+				// TODO: "Por outro lado, um pacote que chegar da rede
+				// mas j´a estiver expirado nunca deve ser armazenado no buffer."				
+				
+				Segment segment = LossDelaySimulator.segmentsList.peek();
 				if (segment != null)
 					if (segment.getTime() == (new Date().getTime())) {
-						System.out.println("s: " + segment.getOrder() + " now: " + segment.getTime() + " seg.t:" + (new Date().getTime()));
-						produce(LossDelayEmulator.segmentsList.take());						
-						System.out.println("s: " + segment.getOrder() + " retirado da lista de atrasos: " + LossDelayEmulator.segmentsList.toString());
-					} else
-						System.out.println("now: " + (new Date().getTime()));
+						
+						if (buffer.size() == SIZE) System.out.println("O BUFFER ESTA CHEIO E DEVO ELIMINAR O PACOTE MAIS VELHO PRA DEPOIS INSERIR ESTE:" + segment.toString());
+						
+//						System.out.println("s: " + segment.getOrder() + " now: " + segment.getTime() + " seg.t:" + (new Date().getTime()));
+						produce(LossDelaySimulator.segmentsList.take());						
+//						System.out.println("s: " + segment.getOrder() + " retirado da lista de atrasos: " + LossDelaySimulator.segmentsList.toString());
+					} 
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -119,6 +118,10 @@ class Producer implements Runnable {
 		while (buffer.size() == SIZE) {
 			synchronized (buffer) {
 				System.out.println("Buffer cheio. " + Thread.currentThread().getName() + " esperando, size: " + buffer.size());
+//				// TODO: Caso o buffer esteja cheio, deve-se remover o pacote
+//				// mais velho que
+//				// encontra-se no buffer para dar espa¸co ao novo pacote.				
+//				buffer.remove(SIZE-1);  
 				buffer.wait();
 			}
 		}

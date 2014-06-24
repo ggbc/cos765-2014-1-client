@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Random;
@@ -16,12 +17,12 @@ import org.uncommons.maths.random.Probability;
 
 import com.cos765.common.Segment;
 
-public class LossDelayEmulator {
+public class LossDelaySimulator {
 
 	public static LinkedBlockingQueue<Segment> segmentsList = new LinkedBlockingQueue<Segment>();
-	private static double E_x = 0.0;
-	private static double p = 0.0;
-	private static long RTT = 0;
+	private static double E_x = 0.0; // tempo médio entre os eventos. média da v.a. com distribuição exponencial X
+	private static double p = 0.0; // probabilidade de perda de pacotes
+	private static long RTT = 0; 
 	
 	public static void configure() {
 		Properties prop = new Properties();			
@@ -53,7 +54,7 @@ public class LossDelayEmulator {
 	}
 
 	// Emula perda e atraso
-	public static void doEmulate(Segment s) {
+	public static void doSimulate(Segment s) {
 		s = loseByChance(s); // pacote será perdido?
 		if (s == null)
 			return;
@@ -61,7 +62,7 @@ public class LossDelayEmulator {
 		addSorted(s); // coloque na fila na posição correta
 		System.out.println("s: " + s.getOrder()
 				+ " colocado na lista de atrasos."
-				+ LossDelayEmulator.segmentsList.toString());
+				+ LossDelaySimulator.segmentsList.toString());
 	}
 
 	// Adiciona o segmento à fila ordenada na posição correta de acordo com o
@@ -78,26 +79,26 @@ public class LossDelayEmulator {
 	}
 
 	private static Segment delay(Segment segment) {
-		// TODO:
-		ExponentialGenerator e = new ExponentialGenerator(0.4, new Random());
-		e.nextValue();
+		double lambda = 1/E_x;
+		ExponentialGenerator X = new ExponentialGenerator(lambda, new Random()); // v.a. com distribuição exponencial e média E[X]		
+//		double x = -1 * Math.log(1.0 - rnd.nextInt(2)) * E_x;
+		double x = X.nextValue(); // valor aletório da v.a. X	
+		long tn = 0; // atraso simulado	
 
-		segment.setTime(segment.getTime() + (long) (new Random()).nextInt(100)); // TODO:
-																					// tn
-																					// =
-																					// t
-																					// +
-																					// RTT/2
-																					// +
-																					// X
+		tn = segment.getTime() + RTT/2 + Math.round(x);
+				
+		System.out.println(x + " : "+ (segment.getTime() - tn));
+		segment.setTime(tn); 
+
 		return segment;
 	}
 
 	private static Segment loseByChance(Segment segment) {
 		Probability lossChance = new Probability(p);		
-		if (lossChance.nextEvent(new Random()) == true)
+		if (lossChance.nextEvent(new Random()) == true) {
+			System.out.println("perda do segmento: " + segment.toString()); 
 			return null;
-		else
+		} else
 			return segment;
 	}
 

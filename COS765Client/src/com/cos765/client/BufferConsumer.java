@@ -1,5 +1,6 @@
 package com.cos765.client;
 
+import java.util.LinkedList;
 import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -8,10 +9,10 @@ import com.cos765.common.Segment;
 
 public class BufferConsumer implements Runnable {
 
-	private Vector buffer;
+	private LinkedList<Segment> buffer;
 	private final int SIZE;
 
-	public BufferConsumer(Vector buffer, int size) {	
+	public BufferConsumer(LinkedList<Segment> buffer, int size) {	
 		this.buffer = buffer;
 		this.SIZE = size;
 	}
@@ -43,7 +44,8 @@ public class BufferConsumer implements Runnable {
 		}
 
 		synchronized (buffer) {
-			Segment s = (Segment) buffer.remove(0);
+			Segment s = (Segment) buffer.removeFirst();
+//			Segment s = (Segment) buffer.remove(0);			
 			System.out.println("C: " + buffer.toString());
 			if (buffer.size() == 0)
 				Common.bufferFull = false;
