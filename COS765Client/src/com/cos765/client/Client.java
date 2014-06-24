@@ -23,7 +23,7 @@ public class Client {
 	public static void main(String args[]) throws SocketException, UnknownHostException {		
 		
 		LinkedList<Segment> buffer = new LinkedList<Segment>();
-		Thread producer = new Thread(new Producer(buffer, Common.MAX_BUFFER_SIZE), "Produtor");
+		Thread producer = new Thread(new BufferProducer(buffer, Common.MAX_BUFFER_SIZE), "Produtor");
 		Thread consumer = new Thread(new BufferConsumer(buffer, Common.MAX_BUFFER_SIZE), "Consumidor");		
 		
 		LossDelaySimulator.configure(); // ler parâmetros de configuração do simulador
@@ -66,7 +66,7 @@ public class Client {
 				LossDelaySimulator.doSimulate(segment);
 
 				// String modifiedSentence = new
-				// String(receivePacket.getData());
+//				 String(receivePacket.getData());
 				// System.out.println("FROM SERVER: " + modifiedSentence);
 			}
 		} catch (Exception e) {
@@ -78,63 +78,3 @@ public class Client {
 }
 
 
-class Producer implements Runnable {
-
-	private LinkedList<Segment> buffer;
-	private final int SIZE;
-
-	public Producer(LinkedList<Segment> buffer, int size) {
-		this.buffer = buffer;
-		this.SIZE = size;
-	}
-
-	@Override
-	public void run() {
-		while (true) {
-			try {
-				Thread.sleep(1); // a cada 1 ms verifica se está na hora de enviar algo para o buffer
-
-				// TODO: "Por outro lado, um pacote que chegar da rede
-				// mas j´a estiver expirado nunca deve ser armazenado no buffer."				
-				
-				Segment segment = LossDelaySimulator.segmentsList.peek();
-				if (segment != null)
-					if (segment.getTime() <= (new Date().getTime())) {
-						synchronized (buffer) {
-							if (SIZE == buffer.size()) {								
-								System.out.println("BUFFER JÁ ESTÁ CHEIO!! " + segment.toString() + " substituirá: " + buffer.getFirst());
-								buffer.removeFirst();
-							}
-//							System.out.println("s: " + segment.getOrder() + " now: " + segment.getTime() + " seg.t:" + (new Date().getTime()));
-							produce(LossDelaySimulator.segmentsList.take());						
-//							System.out.println("s: " + segment.getOrder() + " retirado da lista de atrasos: " + LossDelaySimulator.segmentsList.toString());
-						}						
-					} 
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private void produce(Segment s) throws InterruptedException {
-
-		// Esta condição não precisa existir porque o buffer já não vai parar de receber dados quando estiver cheio, mas sim vai descartar o mais velho. 
-//		while (buffer.size() == SIZE) {
-//			synchronized (buffer) {
-//				System.out.println("Buffer cheio. " + Thread.currentThread().getName() + " esperando, size: " + buffer.size());			
-//				buffer.wait();
-//			}
-//		}
-
-		// producing element and notify consumers
-		synchronized (buffer) {
-			buffer.add(s);
-			if (buffer.size() == SIZE) { 
-				Common.bufferFull = true; 
-			}
-			System.out.println("P: " + buffer.toString());
-			buffer.notifyAll(); // só permite consumir quando esteve cheio em
-								// algum momento
-		}
-	}
-}

@@ -11,6 +11,8 @@ public class BufferConsumer implements Runnable {
 
 	private LinkedList<Segment> buffer;
 	private final int SIZE;
+	private byte nextSegmentToPlay = 1;
+	private byte segmentsNotPlayed = 0;
 
 	public BufferConsumer(LinkedList<Segment> buffer, int size) {	
 		this.buffer = buffer;
@@ -21,13 +23,11 @@ public class BufferConsumer implements Runnable {
 	public void run() {
 		while (true) {
 			try {
-				// TODO: Se no momento da leitura do pacote i ele n˜ao estiver no buffer, deve-se tocar o pacote com n´umero
-//				de sequencia i + 1 (ou o de menor n´umero de sequencia armazenado no buffer) e o pacote i nunca ser´a
-//				tocado. 				
-				
+				//"A partir deste momento vocˆe deve consumir os pacotes a intervalos fixos de 20ms."
 				Thread.sleep(20);
 				consume();
 			} catch (InterruptedException ex) {
+				
 			}
 		}
 	}
@@ -35,15 +35,23 @@ public class BufferConsumer implements Runnable {
 	private Segment consume() throws InterruptedException {
 		while (Common.bufferFull == false) {
 			synchronized (buffer) {
-				System.out.println("Buffer ainda não (re)encheu. "
-						+ Thread.currentThread().getName()
-						+ " esperando, size: " + buffer.size());
+				System.out.println("Buffer ainda não (re)encheu. " + Thread.currentThread().getName() + " esperando, size: " + buffer.size());
 				buffer.wait();
 			}
 		}
 
 		synchronized (buffer) {
+			while (buffer.getFirst().getOrder() != nextSegmentToPlay) {
+				segmentsNotPlayed++;
+				nextSegmentToPlay++;				
+				// "Se no momento da leitura do pacote i ele n˜ao estiver no buffer, deve-se tocar o pacote com n´umero
+				//de sequencia i + 1 (ou o de menor n´umero de sequencia armazenado no buffer) e o pacote i nunca ser´a
+				//tocado."					
+				// "O pacote i deve ser contabilizado como pacote perdido."				
+			}			
+			
 			Segment s = (Segment) buffer.removeFirst();	
+			nextSegmentToPlay++;
 			System.out.println("C: " + buffer.toString());
 			if (buffer.size() == 0)
 				Common.bufferFull = false;

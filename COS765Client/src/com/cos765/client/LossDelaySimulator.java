@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Random;
@@ -14,6 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.uncommons.maths.random.ExponentialGenerator;
 import org.uncommons.maths.random.Probability;
 
+import com.cos765.common.Common;
 import com.cos765.common.Segment;
 
 public class LossDelaySimulator {
@@ -74,9 +76,7 @@ public class LossDelaySimulator {
 			return;
 		s = delay(s); // se não foi perdido, calcule atraso aleatório
 		addSorted(s); // coloque na fila na posição correta
-		System.out.println("s: " + s.getOrder()
-				+ " colocado na lista de atrasos."
-				+ LossDelaySimulator.segmentsList.toString());
+//		System.out.println("s: " + s.getOrder() + " colocado na lista de atrasos." + LossDelaySimulator.segmentsList.toString());
 	}
 
 	// Adiciona o segmento à fila ordenada na posição correta de acordo com o
@@ -114,4 +114,73 @@ public class LossDelaySimulator {
 			return segment;
 	}
 
+}
+
+class BufferProducer implements Runnable {
+
+	private LinkedList<Segment> buffer;
+	private final int SIZE;
+	private byte lastBufferSegment = 0;
+
+	public BufferProducer(LinkedList<Segment> buffer, int size) {
+		this.buffer = buffer;
+		this.SIZE = size;
+	}
+
+	@Override
+	public void run() {
+		while (true) {
+			try {
+				Thread.sleep(1); // a cada 1 ms verifica se está na hora de enviar algo para o buffer
+
+				Segment segment = LossDelaySimulator.segmentsList.peek();
+				if (segment != null)
+					if (segment.getTime() <= (new Date().getTime())) {
+
+						// "Por outro lado, um pacote que chegar da rede
+						// mas j´a estiver expirado nunca deve ser armazenado no buffer."
+						if (segment.getOrder() < lastBufferSegment) {
+							LossDelaySimulator.segmentsList.poll();
+						} else {
+							synchronized (buffer) {
+								if (SIZE == buffer.size()) {								
+									System.out.println("BUFFER JÁ ESTÁ CHEIO!! " + segment.toString() + " substituirá: " + buffer.getFirst());
+									buffer.removeFirst();
+								}
+	//							System.out.println("s: " + segment.getOrder() + " now: " + segment.getTime() + " seg.t:" + (new Date().getTime()));
+								produce(LossDelaySimulator.segmentsList.take());						
+	//							System.out.println("s: " + segment.getOrder() + " retirado da lista de atrasos: " + LossDelaySimulator.segmentsList.toString());
+							}
+						}
+					} 
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	private void produce(Segment s) throws InterruptedException {
+
+		// Esta condição não precisa existir porque o buffer já não vai parar de receber dados quando estiver cheio, mas sim vai descartar o mais velho. 
+//		while (buffer.size() == SIZE) {
+//			synchronized (buffer) {
+//				System.out.println("Buffer cheio. " + Thread.currentThread().getName() + " esperando, size: " + buffer.size());			
+//				buffer.wait();
+//			}
+//		}
+
+		// producing element and notify consumers
+		synchronized (buffer) {
+			buffer.add(s);
+			if (s.getOrder() > lastBufferSegment) { 
+				lastBufferSegment = s.getOrder();
+			}
+			if (buffer.size() == SIZE) { 
+				Common.bufferFull = true; 
+			}
+			System.out.println("P: " + buffer.toString());
+			buffer.notifyAll(); // só permite consumir quando esteve cheio em
+								// algum momento
+		}
+	}
 }
