@@ -196,9 +196,9 @@ class BufferProducer implements Runnable {
 			Statistics.totalTransferSize += s.getPayload().length;
 			Statistics.throughput = (Statistics.totalTransferSize * 8 * 1000) / Statistics.totalTransferTime; 
 			
-			System.out.println("Total recebido (bytes): " + Statistics.totalTransferSize + 
-					" Tempo total: " + Statistics.totalTransferTime + 
-					" Vazão: " + Statistics.throughput + " bps");									
+//			System.out.println("Total recebido (bytes): " + Statistics.totalTransferSize + 
+//					" Tempo total: " + Statistics.totalTransferTime + 
+//					" Vazão: " + Statistics.throughput + " bps");									
 			
 		}
 	}

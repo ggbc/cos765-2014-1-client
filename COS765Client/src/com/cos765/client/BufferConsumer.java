@@ -14,7 +14,6 @@ public class BufferConsumer implements Runnable {
 	private LinkedList<Segment> buffer;
 	private final int SIZE;
 	private int nextSegmentToPlay = 1;
-	private int playedSegments = 0;
 
 	public BufferConsumer(LinkedList<Segment> buffer, int size) {	
 		this.buffer = buffer;
@@ -49,9 +48,9 @@ public class BufferConsumer implements Runnable {
 			Common.returnedFromPause = false;			
 			Statistics.pauseEndTime = (new Date()).getTime();		
 			Statistics.totalPauseTime += (Statistics.pauseEndTime - Statistics.pauseStartTime);
-			System.out.println("Tempo total parado: " + Statistics.totalPauseTime + 
-					" #pausas: " + Statistics.pauseCount + 
-					" Tempo médio pausado: " + Statistics.totalPauseTime/Statistics.pauseCount + " ms. " );		
+//			System.out.println("Tempo total parado: " + Statistics.totalPauseTime + 
+//					" #pausas: " + Statistics.pauseCount + 
+//					" Tempo médio pausado: " + Statistics.totalPauseTime/Statistics.pauseCount + " ms. " );		
 		}	
 		
 		synchronized (buffer) {
@@ -72,7 +71,6 @@ public class BufferConsumer implements Runnable {
 				Statistics.pauseStartTime = (new Date()).getTime();
 				Statistics.pauseCount++;					
 			}
-//			buffer.notifyAll(); 
 			return s;
 		}
 	}
