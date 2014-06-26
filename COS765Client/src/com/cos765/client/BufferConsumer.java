@@ -25,7 +25,7 @@ public class BufferConsumer implements Runnable {
 		while (true) {
 			try {
 				//"A partir deste momento vocˆe deve consumir os pacotes a intervalos fixos de 20ms."
-				Thread.sleep(20);
+				Thread.sleep(Common.SLEEP_TIME);
 				consume();				
 			} catch (InterruptedException ex) {
 				
