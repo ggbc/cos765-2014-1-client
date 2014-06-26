@@ -146,7 +146,7 @@ class BufferProducer implements Runnable {
 							synchronized (buffer) {
 								if (buffer.size() == SIZE) {								
 //									System.out.println("BUFFER JÁ ESTÁ CHEIO!! " + segment.toString() + " substituirá: " + buffer.getFirst());
-									Statistics.lostSegments++;
+									Statistics.discardedSegments++;
 									buffer.removeFirst();
 								}
 //								System.out.println("s: " + segment.getSequenceNumber() + " now: " + (new Date().getTime()) + " seg.t:" +  segment.getTime());

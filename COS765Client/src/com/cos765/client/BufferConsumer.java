@@ -14,6 +14,7 @@ public class BufferConsumer implements Runnable {
 	private LinkedList<Segment> buffer;
 	private final int SIZE;
 	private int nextSegmentToPlay = 1;
+	private int playedSegments = 0;
 
 	public BufferConsumer(LinkedList<Segment> buffer, int size) {	
 		this.buffer = buffer;
@@ -26,7 +27,7 @@ public class BufferConsumer implements Runnable {
 			try {
 				//"A partir deste momento vocˆe deve consumir os pacotes a intervalos fixos de 20ms."
 				Thread.sleep(20);
-				consume();
+				consume();				
 			} catch (InterruptedException ex) {
 				
 			}
@@ -60,9 +61,10 @@ public class BufferConsumer implements Runnable {
 				//tocado."					
 				// "O pacote i deve ser contabilizado como pacote perdido."
 				nextSegmentToPlay++;				
-			}					
-			
-			Segment s = (Segment) buffer.removeFirst();	
+			}
+		
+			Segment s = (Segment) buffer.removeFirst();
+			Statistics.playedSegments++;			
 			nextSegmentToPlay++;
 			System.out.println("C: " + buffer.toString());
 			if (buffer.size() == 0) {
