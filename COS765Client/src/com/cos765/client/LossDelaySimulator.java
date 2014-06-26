@@ -78,7 +78,7 @@ public class LossDelaySimulator {
 			return;
 		s = delay(s); // se não foi perdido, calcule atraso aleatório
 		addSorted(s); // coloque na fila na posição correta
-//		System.out.println("s: " + s.getOrder() + " colocado na lista de atrasos." + LossDelaySimulator.segmentsList.toString());
+//		System.out.println("s: " + s.getSequenceNumber() + " colocado na lista de atrasos." + LossDelaySimulator.segmentsList.toString());
 	}
 
 	// Adiciona o segmento à fila ordenada na posição correta de acordo com o
@@ -95,15 +95,11 @@ public class LossDelaySimulator {
 	private static Segment delay(Segment segment) {
 		double lambda = 1/E_x;
 		ExponentialGenerator X = new ExponentialGenerator(lambda, new Random()); // v.a. com distribuição exponencial e média E[X]		
-//		double x = -1 * Math.log(1.0 - rnd.nextInt(2)) * E_x;
 		double x = X.nextValue(); // valor aletório da v.a. X	
 		long tn = 0; // atraso simulado	
 
-		tn = segment.getTime() + RTT/2 + Math.round(x);
-				
-//		System.out.println(x + " : "+ (segment.getTime() - tn));
-		segment.setTime(tn); 
-
+		tn = segment.getTime() + RTT/2 + Math.round(x);				
+		segment.setTime(tn);
 		return segment;
 	}
 
@@ -122,7 +118,7 @@ class BufferProducer implements Runnable {
 
 	private LinkedList<Segment> buffer;
 	private final int SIZE;
-	private byte lastBufferSegment = 0;
+	private int lastBufferSegment = 0;
 
 	public BufferProducer(LinkedList<Segment> buffer, int size) {
 		this.buffer = buffer;
@@ -142,19 +138,21 @@ class BufferProducer implements Runnable {
 						// "Por outro lado, um pacote que chegar da rede
 						// mas j´a estiver expirado nunca deve ser armazenado no buffer."
 						if (segment.getSequenceNumber() < lastBufferSegment) {
+//							System.out.println("segto EXPIRADO. " + segment.toString());							
 							LossDelaySimulator.segmentsList.poll();
 						} else {
 							synchronized (buffer) {
-								if (SIZE == buffer.size()) {								
-									System.out.println("BUFFER JÁ ESTÁ CHEIO!! " + segment.toString() + " substituirá: " + buffer.getFirst());
+								if (buffer.size() == SIZE) {								
+//									System.out.println("BUFFER JÁ ESTÁ CHEIO!! " + segment.toString() + " substituirá: " + buffer.getFirst());
 									buffer.removeFirst();
 								}
-	//							System.out.println("s: " + segment.getOrder() + " now: " + segment.getTime() + " seg.t:" + (new Date().getTime()));
+//								System.out.println("s: " + segment.getSequenceNumber() + " now: " + (new Date().getTime()) + " seg.t:" +  segment.getTime());
 								produce(LossDelaySimulator.segmentsList.take());						
-	//							System.out.println("s: " + segment.getOrder() + " retirado da lista de atrasos: " + LossDelaySimulator.segmentsList.toString());
+//								System.out.println("s: " + segment.getSequenceNumber() + " retirado da lista de atrasos: " + LossDelaySimulator.segmentsList.toString());
 							}
 						}
 					} 
+//					else System.out.println("now: " + (new Date().getTime()) + " seg.t:" +  segment.getTime());
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

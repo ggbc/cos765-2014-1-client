@@ -7,19 +7,16 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.Random;
-import java.util.Vector;
-
-import org.uncommons.maths.random.Probability;
 
 import com.cos765.common.Common;
 import com.cos765.common.Segment;
 
 public class Client {
-
+	
 	public static void main(String args[]) throws SocketException, UnknownHostException {		
 		
 		LossDelaySimulator.configure(); // ler parâmetros de configuração do simulador		
@@ -38,7 +35,7 @@ public class Client {
 		byte[] receiveData = new byte[Segment.PAYLOAD_SIZE + Segment.HEADER_SIZE]; // bytes do arquivo recebido
 		byte[] payload = new byte[Segment.PAYLOAD_SIZE];
 		long receiveTime = 0;
-		byte sequenceNumber = 0;
+		int sequenceNumber = 0;
 
 		try {
 			// Cliente informa o nome do arquivo desejado
@@ -53,11 +50,10 @@ public class Client {
 				DatagramPacket receivePacket = new DatagramPacket(receiveData,
 						receiveData.length);
 				clientSocket.receive(receivePacket);
-
-				receiveTime = (new Date()).getTime(); // "Quando um segmento é recebido, o tempo atual t é lido."
-				sequenceNumber = receiveData[0];
-				payload = Arrays.copyOfRange(receiveData, 1,
-						receiveData.length - 1);
+		
+				sequenceNumber = getSequenceNumber(getHeader(receiveData));	
+				payload = getPayload(receiveData);
+				receiveTime = (new Date()).getTime(); // "Quando um segmento é recebido, o tempo atual t é lido."				
 
 				Segment segment = new Segment(sequenceNumber, payload, receiveTime);
 				LossDelaySimulator.doSimulate(segment);
@@ -68,6 +64,21 @@ public class Client {
 			clientSocket.close();
 		}
 	}
+	
+	private static int getSequenceNumber(ByteBuffer header) {
+		return header.getInt();
+	}
+	
+	private static ByteBuffer getHeader(byte[] receiveData) {
+		byte headerBytes[] = Arrays.copyOfRange(receiveData, 0, Segment.HEADER_SIZE); 
+		ByteBuffer header = ByteBuffer.wrap(headerBytes);
+		return header;
+	}	
+	
+	private static byte[] getPayload(byte[] receiveData) {
+		return Arrays.copyOfRange(receiveData, Segment.HEADER_SIZE,
+				Segment.PAYLOAD_SIZE);
+	}	
 }
 
 

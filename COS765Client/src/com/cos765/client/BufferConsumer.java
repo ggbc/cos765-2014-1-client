@@ -11,8 +11,8 @@ public class BufferConsumer implements Runnable {
 
 	private LinkedList<Segment> buffer;
 	private final int SIZE;
-	private byte nextSegmentToPlay = 1;
-	private byte segmentsNotPlayed = 0;
+	private int nextSegmentToPlay = 1;
+	private int segmentsNotPlayed = 0;
 
 	public BufferConsumer(LinkedList<Segment> buffer, int size) {	
 		this.buffer = buffer;
@@ -35,7 +35,7 @@ public class BufferConsumer implements Runnable {
 	private Segment consume() throws InterruptedException {
 		while (Common.bufferFull == false) {
 			synchronized (buffer) {
-				System.out.println("Buffer ainda não (re)encheu. " + Thread.currentThread().getName() + " esperando, size: " + buffer.size());
+//				System.out.println("Buffer ainda não (re)encheu. " + Thread.currentThread().getName() + " esperando, size: " + buffer.size());
 				buffer.wait();
 			}
 		}
@@ -49,12 +49,15 @@ public class BufferConsumer implements Runnable {
 				segmentsNotPlayed++;
 				nextSegmentToPlay++;				
 			}			
+//			System.out.println("Pacotes NÃO TOCADOS: " + segmentsNotPlayed + ". Próximo a ser tocado: " + nextSegmentToPlay);
+			
 			
 			Segment s = (Segment) buffer.removeFirst();	
 			nextSegmentToPlay++;
 			System.out.println("C: " + buffer.toString());
-			if (buffer.size() == 0)
+			if (buffer.size() == 0) {
 				Common.bufferFull = false;
+			}
 //			buffer.notifyAll(); 
 			return s;
 		}
