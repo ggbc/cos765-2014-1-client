@@ -6,7 +6,7 @@ import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import com.cos765.common.Common;
-import com.cos765.common.Common.Statistics;
+import com.cos765.common.Common.Metrics;
 import com.cos765.common.Segment;
 
 public class BufferConsumer implements Runnable {
@@ -38,7 +38,7 @@ public class BufferConsumer implements Runnable {
 		while (Common.bufferFull == false) {
 			synchronized (buffer) {
 //				System.out.println("Buffer ainda não (re)encheu. " + Thread.currentThread().getName() + " esperando, size: " + buffer.size());
-				if (Common.Statistics.pauseCount == 1) Statistics.pauseStartTime = (new Date()).getTime(); // quando o programa começa o buffer tb está vazio 
+				if (Common.Metrics.pauseCount == 1) Metrics.pauseStartTime = (new Date()).getTime(); // quando o programa começa o buffer tb está vazio 
 				buffer.wait();
 			}
 		}
@@ -46,8 +46,8 @@ public class BufferConsumer implements Runnable {
 		if (Common.returnedFromPause == true) {
 			// Quando voltar a consumir, marca o fim da pausa
 			Common.returnedFromPause = false;			
-			Statistics.pauseEndTime = (new Date()).getTime();		
-			Statistics.totalPauseTime += (Statistics.pauseEndTime - Statistics.pauseStartTime);
+			Metrics.pauseEndTime = (new Date()).getTime();		
+			Metrics.totalPauseTime += (Metrics.pauseEndTime - Metrics.pauseStartTime);
 //			System.out.println("Tempo total parado: " + Statistics.totalPauseTime + 
 //					" #pausas: " + Statistics.pauseCount + 
 //					" Tempo médio pausado: " + Statistics.totalPauseTime/Statistics.pauseCount + " ms. " );		
@@ -63,13 +63,13 @@ public class BufferConsumer implements Runnable {
 			}
 		
 			Segment s = (Segment) buffer.removeFirst();
-			Statistics.playedSegments++;			
+			Metrics.playedSegments++;			
 			nextSegmentToPlay++;
 			System.out.println("C: " + buffer.toString());
 			if (buffer.size() == 0) {
 				Common.bufferFull = false;
-				Statistics.pauseStartTime = (new Date()).getTime();
-				Statistics.pauseCount++;					
+				Metrics.pauseStartTime = (new Date()).getTime();
+				Metrics.pauseCount++;					
 			}
 			return s;
 		}

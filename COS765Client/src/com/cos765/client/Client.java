@@ -13,9 +13,9 @@ import java.util.Date;
 import java.util.LinkedList;
 
 import com.cos765.common.Common;
-import com.cos765.common.Common.Statistics;
+import com.cos765.common.Common.Metrics;
 import com.cos765.common.Segment;
-import com.cos765.common.StatisticsPrinter;
+import com.cos765.common.MetricsPrinter;
 
 public class Client {
 	
@@ -26,7 +26,7 @@ public class Client {
 		LinkedList<Segment> buffer = new LinkedList<Segment>();
 		Thread producer = new Thread(new BufferProducer(buffer, Common.maxBufferSize), "Produtor");
 		Thread consumer = new Thread(new BufferConsumer(buffer, Common.maxBufferSize), "Consumidor");
-		Thread statisticsPrinter = new Thread(new StatisticsPrinter(), "Provedor de Estatísticas");
+		Thread statisticsPrinter = new Thread(new MetricsPrinter(), "Provedor de Estatísticas");
 				
 		producer.start();
 		consumer.start();
@@ -43,6 +43,8 @@ public class Client {
 
 
 		try {
+			System.out.println("Digite o nome do arquivo desejado (ex. test.txt): ");
+			
 			// Cliente informa o nome do arquivo desejado
 			String fileName = inFromUser.readLine();
 			sendData = fileName.getBytes();
@@ -63,7 +65,7 @@ public class Client {
 				Segment segment = new Segment(sequenceNumber, payload, receiveTime);
 				LossDelaySimulator.doSimulate(segment);
 				
-				Statistics.receivedSegments++;				
+				Metrics.receivedSegments++;				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
