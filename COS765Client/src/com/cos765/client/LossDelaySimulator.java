@@ -16,6 +16,7 @@ import org.uncommons.maths.random.ExponentialGenerator;
 import org.uncommons.maths.random.Probability;
 
 import com.cos765.common.Common;
+import com.cos765.common.Common.Statistics;
 import com.cos765.common.Segment;
 
 public class LossDelaySimulator {
@@ -106,7 +107,8 @@ public class LossDelaySimulator {
 	private static Segment loseByChance(Segment segment) {
 		Probability lossChance = new Probability(p);		
 		if (lossChance.nextEvent(new Random()) == true) {
-//			System.out.println("perda do segmento: " + segment.toString()); 
+//			System.out.println("perda do segmento: " + segment.toString());
+			Statistics.lostSegments++;			
 			return null;
 		} else
 			return segment;
@@ -119,7 +121,7 @@ class BufferProducer implements Runnable {
 	private LinkedList<Segment> buffer;
 	private final int SIZE;
 	private int lastBufferSegment = 0;
-
+	
 	public BufferProducer(LinkedList<Segment> buffer, int size) {
 		this.buffer = buffer;
 		this.SIZE = size;
@@ -134,16 +136,17 @@ class BufferProducer implements Runnable {
 				Segment segment = LossDelaySimulator.segmentsList.peek();
 				if (segment != null)
 					if (segment.getTime() <= (new Date().getTime())) {
-
 						// "Por outro lado, um pacote que chegar da rede
 						// mas j´a estiver expirado nunca deve ser armazenado no buffer."
 						if (segment.getSequenceNumber() < lastBufferSegment) {
-//							System.out.println("segto EXPIRADO. " + segment.toString());							
+//							System.out.println("segto EXPIRADO. " + segment.toString());	
+							Statistics.expiredSegments++;
 							LossDelaySimulator.segmentsList.poll();
 						} else {
 							synchronized (buffer) {
 								if (buffer.size() == SIZE) {								
 //									System.out.println("BUFFER JÁ ESTÁ CHEIO!! " + segment.toString() + " substituirá: " + buffer.getFirst());
+									Statistics.lostSegments++;
 									buffer.removeFirst();
 								}
 //								System.out.println("s: " + segment.getSequenceNumber() + " now: " + (new Date().getTime()) + " seg.t:" +  segment.getTime());
@@ -171,6 +174,8 @@ class BufferProducer implements Runnable {
 
 		// producing element and notify consumers
 		synchronized (buffer) {
+			if (Statistics.initialTransferTime == 0) Statistics.initialTransferTime = (new Date()).getTime() - 1;				
+			
 			buffer.add(s);
 			if (s.getSequenceNumber() > lastBufferSegment) { 
 				lastBufferSegment = s.getSequenceNumber();
@@ -181,6 +186,20 @@ class BufferProducer implements Runnable {
 			System.out.println("P: " + buffer.toString());
 			buffer.notifyAll(); // só permite consumir quando esteve cheio em
 								// algum momento
+			
+			
+//			System.out.println("I; " + s.getSequenceNumber() + "; " + (new Date()).getTime() + "; " + s.getPayload().length);
+			
+			
+			//Medir vazão		
+			Statistics.totalTransferTime = ((new Date().getTime()) - Statistics.initialTransferTime);						
+			Statistics.totalTransferSize += s.getPayload().length;
+			Statistics.throughput = (Statistics.totalTransferSize * 8 * 1000) / Statistics.totalTransferTime; 
+			
+			System.out.println("Total recebido (bytes): " + Statistics.totalTransferSize + 
+					" Tempo total: " + Statistics.totalTransferTime + 
+					" Vazão: " + Statistics.throughput + " bps");									
+			
 		}
 	}
 }

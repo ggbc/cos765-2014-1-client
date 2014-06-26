@@ -31,11 +31,12 @@ public class Client {
 		BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
 		DatagramSocket clientSocket = new DatagramSocket();
 		InetAddress IPAddress = InetAddress.getByName("localhost");
-		byte[] sendData = new byte[Segment.PAYLOAD_SIZE]; // nome do arquivosolicitado
+		byte[] sendData = new byte[Segment.PAYLOAD_SIZE]; // nome do arquivo solicitado
 		byte[] receiveData = new byte[Segment.PAYLOAD_SIZE + Segment.HEADER_SIZE]; // bytes do arquivo recebido
 		byte[] payload = new byte[Segment.PAYLOAD_SIZE];
 		long receiveTime = 0;
 		int sequenceNumber = 0;
+
 
 		try {
 			// Cliente informa o nome do arquivo desejado
@@ -46,17 +47,18 @@ public class Client {
 			clientSocket.send(sendPacket);
 
 			// Recebendo stream de bytes do arquivo solicitado
-			while (true) {
+			while (true) {				
 				DatagramPacket receivePacket = new DatagramPacket(receiveData,
 						receiveData.length);
-				clientSocket.receive(receivePacket);
-		
+				clientSocket.receive(receivePacket);	
+				
 				sequenceNumber = getSequenceNumber(getHeader(receiveData));	
-				payload = getPayload(receiveData);
-				receiveTime = (new Date()).getTime(); // "Quando um segmento é recebido, o tempo atual t é lido."				
+				payload = getPayload(receiveData);				
+				receiveTime = (new Date()).getTime(); // "Quando um segmento é recebido, o tempo atual t é lido."
 
 				Segment segment = new Segment(sequenceNumber, payload, receiveTime);
 				LossDelaySimulator.doSimulate(segment);
+				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -77,7 +79,7 @@ public class Client {
 	
 	private static byte[] getPayload(byte[] receiveData) {
 		return Arrays.copyOfRange(receiveData, Segment.HEADER_SIZE,
-				Segment.PAYLOAD_SIZE);
+				Segment.HEADER_SIZE + Segment.PAYLOAD_SIZE);
 	}	
 }
 
