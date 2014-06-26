@@ -180,17 +180,17 @@ class BufferProducer implements Runnable {
 			if (s.getSequenceNumber() > lastBufferSegment) { 
 				lastBufferSegment = s.getSequenceNumber();
 			}
-			if (buffer.size() == SIZE) { 
+						
+			if (buffer.size() == SIZE) {
+				if (Common.bufferFull == false) { 
+					Common.returnedFromPause = true;
+				}
 				Common.bufferFull = true; 
 			}
 			System.out.println("P: " + buffer.toString());
 			buffer.notifyAll(); // só permite consumir quando esteve cheio em
 								// algum momento
-			
-			
-//			System.out.println("I; " + s.getSequenceNumber() + "; " + (new Date()).getTime() + "; " + s.getPayload().length);
-			
-			
+						
 			//Medir vazão		
 			Statistics.totalTransferTime = ((new Date().getTime()) - Statistics.initialTransferTime);						
 			Statistics.totalTransferSize += s.getPayload().length;

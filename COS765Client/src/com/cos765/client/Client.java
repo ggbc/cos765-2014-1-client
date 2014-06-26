@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.LinkedList;
 
 import com.cos765.common.Common;
+import com.cos765.common.Common.Statistics;
 import com.cos765.common.Segment;
 
 public class Client {
@@ -59,6 +60,7 @@ public class Client {
 				Segment segment = new Segment(sequenceNumber, payload, receiveTime);
 				LossDelaySimulator.doSimulate(segment);
 				
+				Statistics.receivedSegments++; // Contagem de pacotes recebidos no cliente
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

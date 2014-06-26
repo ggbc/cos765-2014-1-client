@@ -14,7 +14,6 @@ public class BufferConsumer implements Runnable {
 	private LinkedList<Segment> buffer;
 	private final int SIZE;
 	private int nextSegmentToPlay = 1;
-	private int lastPauseCount = 0;
 
 	public BufferConsumer(LinkedList<Segment> buffer, int size) {	
 		this.buffer = buffer;
@@ -38,19 +37,21 @@ public class BufferConsumer implements Runnable {
 
 		while (Common.bufferFull == false) {
 			synchronized (buffer) {
-//				System.out.println("Buffer ainda não (re)encheu. " + Thread.currentThread().getName() + " esperando, size: " + buffer.size());				
+//				System.out.println("Buffer ainda não (re)encheu. " + Thread.currentThread().getName() + " esperando, size: " + buffer.size());
+				if (Common.Statistics.pauseCount == 1) Statistics.pauseStartTime = (new Date()).getTime(); // quando o programa começa o buffer tb está vazio 
 				buffer.wait();
 			}
 		}
-		//TODO: VER ISSO!
-		if (lastPauseCount != Statistics.pauseCount) {
-			// Quando conseguir consumir, marca o fim da pausa
+
+		if (Common.returnedFromPause == true) {
+			// Quando voltar a consumir, marca o fim da pausa
+			Common.returnedFromPause = false;			
 			Statistics.pauseEndTime = (new Date()).getTime();		
 			Statistics.totalPauseTime += (Statistics.pauseEndTime - Statistics.pauseStartTime);
 			System.out.println("Tempo total parado: " + Statistics.totalPauseTime + 
 					" #pausas: " + Statistics.pauseCount + 
 					" Tempo médio pausado: " + Statistics.totalPauseTime/Statistics.pauseCount + " ms. " );		
-		}
+		}	
 		
 		synchronized (buffer) {
 			while (buffer.getFirst().getSequenceNumber() != nextSegmentToPlay) {
@@ -59,9 +60,7 @@ public class BufferConsumer implements Runnable {
 				//tocado."					
 				// "O pacote i deve ser contabilizado como pacote perdido."
 				nextSegmentToPlay++;				
-			}			
-//			System.out.println("Pacotes NÃO TOCADOS: " + segmentsNotPlayed + ". Próximo a ser tocado: " + nextSegmentToPlay);
-			
+			}					
 			
 			Segment s = (Segment) buffer.removeFirst();	
 			nextSegmentToPlay++;
@@ -69,8 +68,7 @@ public class BufferConsumer implements Runnable {
 			if (buffer.size() == 0) {
 				Common.bufferFull = false;
 				Statistics.pauseStartTime = (new Date()).getTime();
-				Statistics.pauseCount++;
-				lastPauseCount = Statistics.pauseCount; 
+				Statistics.pauseCount++;					
 			}
 //			buffer.notifyAll(); 
 			return s;
