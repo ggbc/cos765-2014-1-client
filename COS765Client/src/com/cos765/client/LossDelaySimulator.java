@@ -22,9 +22,9 @@ import com.cos765.common.Segment;
 public class LossDelaySimulator {
 
 	public static LinkedBlockingQueue<Segment> segmentsList = new LinkedBlockingQueue<Segment>();
-	private static double E_x = 500.0; // tempo médio E[x] entre os eventos. média da v.a. com distribuição exponencial X
-	private static double p = 0.3; // probabilidade de perda de pacotes
-	private static long RTT = 100; 	
+	public static double E_x = 500.0; // tempo médio E[x] entre os eventos. média da v.a. com distribuição exponencial X
+	public static double p = 0.3; // probabilidade de perda de pacotes
+	public static long RTT = 100; 	
 	
 	public static void configure() {
 		Properties prop = new Properties();			

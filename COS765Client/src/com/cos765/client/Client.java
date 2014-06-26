@@ -26,7 +26,9 @@ public class Client {
 		LinkedList<Segment> buffer = new LinkedList<Segment>();
 		Thread producer = new Thread(new BufferProducer(buffer, Common.maxBufferSize), "Produtor");
 		Thread consumer = new Thread(new BufferConsumer(buffer, Common.maxBufferSize), "Consumidor");
-		Thread statisticsPrinter = new Thread(new MetricsPrinter(), "Provedor de Estatísticas");
+		Thread statisticsPrinter = new Thread(new MetricsPrinter(Common.maxBufferSize, 
+				LossDelaySimulator.RTT, LossDelaySimulator.p, LossDelaySimulator.E_x),
+				"Provedor de Estatísticas");
 				
 		producer.start();
 		consumer.start();
