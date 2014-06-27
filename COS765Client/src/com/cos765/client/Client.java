@@ -67,7 +67,7 @@ public class Client {
 				Segment segment = new Segment(sequenceNumber, payload, receiveTime);
 				LossDelaySimulator.doSimulate(segment);
 				
-				Metrics.receivedSegments++;				
+				Metrics.receivedByUDPSegments++;				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

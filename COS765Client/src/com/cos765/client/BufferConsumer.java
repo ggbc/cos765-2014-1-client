@@ -48,9 +48,6 @@ public class BufferConsumer implements Runnable {
 			Common.returnedFromPause = false;			
 			Metrics.pauseEndTime = (new Date()).getTime();		
 			Metrics.totalPauseTime += (Metrics.pauseEndTime - Metrics.pauseStartTime);
-//			System.out.println("Tempo total parado: " + Statistics.totalPauseTime + 
-//					" #pausas: " + Statistics.pauseCount + 
-//					" Tempo médio pausado: " + Statistics.totalPauseTime/Statistics.pauseCount + " ms. " );		
 		}	
 		
 		synchronized (buffer) {
@@ -65,7 +62,7 @@ public class BufferConsumer implements Runnable {
 			Segment s = (Segment) buffer.removeFirst();
 			Metrics.playedSegments++;			
 			nextSegmentToPlay++;
-			System.out.println("C: " + buffer.toString());
+//			System.out.println("C: " + buffer.toString());
 			if (buffer.size() == 0) {
 				Common.bufferFull = false;
 				Metrics.pauseStartTime = (new Date()).getTime();

@@ -174,9 +174,10 @@ class BufferProducer implements Runnable {
 
 		// producing element and notify consumers
 		synchronized (buffer) {
-			if (Metrics.initialTransferTime == 0) Metrics.initialTransferTime = (new Date()).getTime() - 1;				
+			if (Metrics.initialTransferTime == 0) Metrics.initialTransferTime = (new Date()).getTime() - 1;			
 			
 			buffer.add(s);
+			Metrics.receivedByBufferSegments++;			
 			if (s.getSequenceNumber() > lastBufferSegment) { 
 				lastBufferSegment = s.getSequenceNumber();
 			}
@@ -187,7 +188,7 @@ class BufferProducer implements Runnable {
 				}
 				Common.bufferFull = true; 
 			}
-			System.out.println("P: " + buffer.toString());
+//			System.out.println("P: " + buffer.toString());
 			buffer.notifyAll(); // só permite consumir quando esteve cheio em
 								// algum momento
 						
