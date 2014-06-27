@@ -195,7 +195,7 @@ class BufferProducer implements Runnable {
 			//Medir vazão		
 			Metrics.totalTransferTime = ((new Date().getTime()) - Metrics.initialTransferTime);						
 			Metrics.totalTransferSize += s.getPayload().length;
-			Metrics.throughput = (Metrics.totalTransferSize * 8 * 1000) / Metrics.totalTransferTime; 
+			Metrics.throughput = (Metrics.totalTransferSize * 8.0) / Metrics.totalTransferTime; 
 			
 //			System.out.println("Total recebido (bytes): " + Statistics.totalTransferSize + 
 //					" Tempo total: " + Statistics.totalTransferTime + 
